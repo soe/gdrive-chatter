@@ -16,6 +16,8 @@ appAPI.ready(function($) {
 		endpoint_prompt: 'Please set chatter endpoint',
 		endpoint_sample: 'https://c.na9.visual.force.com/apex/gdrive_chatter',
 	};
+	
+	var docTitle, iframeTimer;
 
 	// load local resources
 	appAPI.resources.includeCSS('css/extension.css');
@@ -32,7 +34,7 @@ appAPI.ready(function($) {
 	$('<div id="modal-wrapper" style="display: none;"><div id="modal" style="width: 580px; height: 440px;" /></div>').appendTo('body');
 	
 	// insert close button
-	$('<div id="modal-title"><span id="modal-title-text">Title Here</span><span id="modal-close-btn">x</span></div>').appendTo('#modal');
+	$('<div id="modal-title"><span id="modal-title-text">Title Here</span><span id="modal-close-btn">x</span><div style="clear: both" /></div>').appendTo('#modal');
 	
 	// insert modal-body
 	$('<div id="modal-body"><iframe src="" marginwidth=0 marginheight=0 frameborder=0 scrolling=yes style="border: 0; width: 560px; height: 360px; margin: 10px 8px 10px 12px;" /></div>').appendTo('#modal');	
@@ -49,7 +51,8 @@ appAPI.ready(function($) {
 	
 	// delegate to click on td.doclist-td-name - when chatter icon is clicked
 	$('body').delegate('td.doclist-td-name', 'click', function(e) {
-		if(e.target.nodeName == 'SPAN') return;
+		
+		if(!$(this).hasClass('doclist-td-name')) return;
 		
 		//console.log($(this).attr('id').split('.')[2]);
 		//console.log($(this).find('.doclist-content-wrapper').html());
@@ -58,30 +61,37 @@ appAPI.ready(function($) {
 		if(!appAPI.db.get('chatter_endpoint')) $('#chatter-endpoint-btn').click();
 	
 		// set iframe src
-		$('#modal-body > iframe').attr('src', appAPI.db.get('chatter_endpoint') +'?DocumentID='+ $(this).attr('id').split('.')[2]);
+		var _url = appAPI.db.get('chatter_endpoint') +'?DocumentID='+ $(this).attr('id').split('.')[2];
 		
-		var docTitle = $(this).find('.doclist-content-wrapper').html();
 		
-		// successful iframe loading
-		$('#modal-body > iframe').load(function() {
-        	clearTimeout(iframeTimer);
-        	
-        	// change #modal-title-text
-			$('#modal-title-text').html(docTitle);
-		
-    	});
-    	
-		// unsuccessful iframe loading - ask user to login
-		var iframeTimer = window.setTimeout(function() {
-			$('#modal-title-text').html(MESSAGES['chatter_login']);
-		}, 3000);
+		docTitle = $(this).find('.doclist-content-wrapper').html();
 		
 		// set loading message
 		$('#modal-title-text').html(MESSAGES['chatter_loading']);
 		
 		// show modal
 		$('#modal-wrapper').fadeIn('fast');
-
+		
+		appAPI.request.get(_url, function(resp) {
+			if($(resp).find('#newfeed').length) { // iframe success
+			
+				// change #modal-title-text to title
+				$('#modal-title-text').html(docTitle);
+				
+				// set iframe src
+				$('#modal-body > iframe').attr('src', _url);
+			} else { // iframe fail - ask user to login
+			
+				// change #modal-title-text to login message 
+				$('#modal-title-text').html(MESSAGES['chatter_login']);
+				
+				// set iframe src to blank page
+				$('#modal-body > iframe').attr('src', '');
+			}
+		}, function(resp) {
+			
+		}); // end appAPI.request.get
+		
 		e.preventDefault();
 	});
 
