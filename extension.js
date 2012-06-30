@@ -96,7 +96,7 @@ appAPI.ready(function($) {
 	// listen to click #chatter-endpoint-btn
 	$('#chatter-endpoint-btn').on('click', function(e) {
 		var _endpoint = prompt(MESSAGES['endpoint_prompt'], appAPI.db.get('chatter_endpoint'));
-		appAPI.db.set('chatter_endpoint', _endpoint);
+		if(_endpoint) appAPI.db.set('chatter_endpoint', _endpoint);
 		
 		e.preventDefault();
 	});
