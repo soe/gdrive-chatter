@@ -1,0 +1,83 @@
+#modal-wrapper {
+	display: none;
+	
+  	position: absolute;
+  	top: 0;
+  	left: 0;
+  	width: 100%;
+  	height: 100%;
+  	z-index: 999;
+  	padding: 20px;
+  	
+  	background: rgba(0, 0, 0, 0.4);
+}
+
+#modal {
+	position: relative;
+	margin: 20px auto;
+	
+	background-color: #fff;
+	border: 4px solid #eee;
+	border-radius: 8px;
+}
+
+#modal-title {
+	margin: 6px 8px 6px 12px; 
+	padding: 10px 0;
+	border-bottom: 1px solid #eee;
+	max-height: 32px;
+}
+
+#modal-title-text {
+	display: inline-block;
+	width: 94%;
+	color: #444;
+	overflow: hidden;
+}
+
+#modal-close-btn {
+	display: inline-block;
+	padding: 2px 8px;
+	font-size: 11px;
+	font-weight: 700;
+	border-radius: 2px;
+	
+	margin-top: -4px;
+	border: 1px solid #ccc;
+	background-color: #eee;
+	color: #444;
+	
+	cursor: pointer;
+}
+
+#modal-body {
+		
+}
+
+#modal-body > iframe {
+	border: 0;
+	overflow: scroll;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.chatter-btn {
+	float: left;
+	background: url(resource-image://img/comment_bubble_16.png) transparent no-repeat;
+	background-position: center center;
+	color: #fff;
+	width: 18px;
+	height: 100%;
+	margin: auto 8px auto 2px;
+	
+	opacity: 0.5;
+	cursor: pointer;
+}
+
+.chatter-btn:hover {
+	opacity: 1;
+}
+
+#chatter-endpoint-btn {
+	margin-top: 8px;
+}
