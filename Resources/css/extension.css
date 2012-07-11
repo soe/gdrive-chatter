@@ -14,7 +14,7 @@
 
 #modal {
 	position: relative;
-	margin: 20px auto;
+	margin: 40px auto 0 auto;
 	
 	background-color: #fff;
 	border: 4px solid #eee;
@@ -84,14 +84,25 @@
 	margin: auto 8px auto 2px;
 	
 	opacity: 0.7;
+	filter: alpha(opacity = 70); zoom:1;
 	cursor: pointer;
 }
 
 .chatter-btn:hover {
 	opacity: 1;
-	background-color: #000;
+	filter: alpha(opacity = 100); zoom:1;
 }
 
 #chatter-endpoint-btn {
-	margin-top: 8px;
+	vertical-align: middle;
+	margin-right: 6px;
+}
+
+#chatter-endpoint-btn .icon {
+	background: url(resource-image://img/comment_bubble_16.png) transparent no-repeat;
+	height: 21px;
+	width: 17px;
+	vertical-align: top;
+	margin: auto auto;
+	margin-top: 6px;
 }

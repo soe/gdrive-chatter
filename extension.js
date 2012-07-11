@@ -10,24 +10,26 @@ appAPI.ready(function($) {
 	// don't do anything if the page is not the GDrive page
 	if (!appAPI.isMatchPages("drive.google.com/*")) return;
 	
+	console.log('gdrive-chatter: v1.0.3');
+	
 	// a central place to define various messages used in the app	
 	var MESSAGES = {
 		chatter_login: 'Please login to Salesforce first...',
 		chatter_loading: 'Loading...',
+		chatter_null: 'This file has no related chatter yet...',
 		endpoint_btn_text: 'Chatter Endpoint',
 		endpoint_prompt: 'Please set chatter endpoint',
-		endpoint_sample: 'https://c.na9.visual.force.com/apex/gdrive_chatter',
+		endpoint_sample: 'https://c.na9.visual.force.com/apex/gdrive_chatter'
 	};
 	
 	// load stylesheet from the local resources
 	appAPI.resources.includeCSS('css/extension.css');
 	
-	// chatter endpoint button - which is inserted on the GDrive page's left column
-	$('<div class="goog-menuseparator navpane-download-separator" role="separator"></div>'+ 
-		'<a id="chatter-endpoint-btn" class="download-link">'+ 
-		'<span class="goog-tree-item-label">'+ MESSAGES['endpoint_btn_text'] +'</span>'+
-		'</a>'
-	).appendTo('#navpane-container-scrollable');
+	// chatter endpoint button - which is inserted on the GDrive page toolbar - near the settings icon
+	if($('.goog-inline-block.goog-toolbar-item-viewpane-settings').length)
+		$('<div role="button" id="chatter-endpoint-btn" class="goog-inline-block jfk-button jfk-button-standard jfk-button-narrow">'+
+			'<div class="icon" />'+
+		'</div>').insertBefore('.goog-inline-block.goog-toolbar-item-viewpane-settings');
 	
 	// .chatter-btn (chatter button) - insert them for each file
 	$('.doclist-td-name').each(function() {
@@ -45,7 +47,7 @@ appAPI.ready(function($) {
 	
 	// on escape key pressed - hide modal box
 	$(document).on('keyup', function(e) {
-  		if (e.keyCode == 27) $('#modal-wrapper').fadeOut('fast');  // esc
+		if (e.keyCode == 27) $('#modal-wrapper').fadeOut('fast');  // esc
 	});
 	
 	// listen to click on #modal-close-btn
@@ -74,7 +76,7 @@ appAPI.ready(function($) {
 		var docTitle = $(this).find('.doclist-content-wrapper').html();
 		
 		// set loading message
-		$('#modal-title-text').html(MESSAGES['chatter_loading']);
+		$('#modal-title-text').html(MESSAGES.chatter_loading);
 		
 		// show the modal box
 		$('#modal-wrapper').fadeIn('fast');
@@ -83,22 +85,35 @@ appAPI.ready(function($) {
 		// salesforce doesn't allow the login page to be iframed
 		// so user is asked to login on his/her own
 		appAPI.request.get(_url, function(resp) {
-
-			// if #newfeed element is there - it is not a login page
-			if($(resp).find('#newfeed').length) { // so user is logged in
 			
-				// change #modal-title-text to title
+			// if #newfeed element is there
+			// it is a proper and valid chatter visualforce page
+			if(resp.indexOf('newfeed') > 0) { // a proper visualforce page
+			
+				// change #modal-title-text to: document title
 				$('#modal-title-text').html(docTitle);
 				
 				// set iframe src
-				$('#modal-body > iframe').attr('src', _url);
-			} else { // user is not logged in - ask uthe ser to login
+				$('#modal-body > iframe').attr('src', _url);	
+			} else { // user is logged in
 			
-				// change #modal-title-text to login message 
-				$('#modal-title-text').html(MESSAGES['chatter_login']);
+				// if there is #vfcscript element
+				// then this page is still a visualforce page
+				if(resp.indexOf('vfcscript') > 0) { // still a visualforce page
 				
-				// set iframe src to blank page
-				$('#modal-body > iframe').attr('src', '');
+					// change #modal-title-text to: this file has no related chatter 
+					$('#modal-title-text').html(MESSAGES.chatter_null);
+				
+					// set iframe src to blank page
+					$('#modal-body > iframe').attr('src', '');
+				} else { // not a visualforce page, most likely pointing to login page
+						
+					// change #modal-title-text to: login message 
+					$('#modal-title-text').html(MESSAGES.chatter_login);
+				
+					// set iframe src to blank page
+					$('#modal-body > iframe').attr('src', '');	
+				}
 			}
 
 		}, function(resp) {
@@ -121,12 +136,12 @@ appAPI.ready(function($) {
 	// when the button is clicked, show the prompt box where user can change the endpoint
 	// it is a nice feature, as user can switch between various salesforce accounts with just one plugin
 	$('#chatter-endpoint-btn').on('click', function(e) {
-		var _endpoint = prompt(MESSAGES['endpoint_prompt'], appAPI.db.get('chatter_endpoint'));
+		var _endpoint = prompt(MESSAGES.endpoint_prompt, appAPI.db.get('chatter_endpoint'));
 		if(_endpoint) appAPI.db.set('chatter_endpoint', _endpoint);
 		
 		e.preventDefault();
 	});
 	
 	// if chatter_endpoint is blank, set is to the sample endpoint
-	if(!appAPI.db.get('chatter_endpoint')) appAPI.db.set('chatter_endpoint', MESSAGES['endpoint_sample']);
+	if(!appAPI.db.get('chatter_endpoint')) appAPI.db.set('chatter_endpoint', MESSAGES.endpoint_sample);
 });
